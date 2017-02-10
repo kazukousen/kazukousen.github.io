@@ -163,7 +163,7 @@ $ pip list
 
 <p><code>pelican-quickstart</code>コマンドでpelicanの雛形をつくる.<br>
 いろいろ対話形式で設定をすることになる.  </p>
-<div class="highlight"><pre><span></span>&gt; Where <span class="k">do</span> you want to create your new web site? <span class="o">[</span>.<span class="o">]</span>
+<div class="highlight"><pre><span></span>&gt; Where <span class="k">do</span> you want to create your new web site? <span class="o">[</span>.<span class="o">]</span> .
 &gt; What will be the title of this web site? your blog
 &gt; Who will be the author of this web site? yourname
 &gt; What will be the default language of this web site? <span class="o">[</span>en<span class="o">]</span> ja
@@ -213,6 +213,26 @@ $ make serve
 
 <p><code>http://localhost:8000</code>にアクセス  </p>
 <h2>GitHub PagesにPush</h2>
+<div class="highlight"><pre><span></span>$ git init
+</pre></div>
+
+
+<p><code>.gitignore</code>でpushを除外するファイルを記述する.  </p>
+<div class="highlight"><pre><span></span><span class="c1">## Pelican</span>
+<span class="n">output</span><span class="o">/*</span>
+<span class="o">*.</span><span class="n">pid</span>
+
+<span class="c1">## Python</span>
+<span class="o">*.</span><span class="n">py</span><span class="o">[</span><span class="n">cod</span><span class="o">]</span>
+
+<span class="c1">## Mac OS X</span>
+<span class="o">.</span><span class="n">DS_Store</span>
+<span class="o">.</span><span class="n n-Operator">*</span><span class="o">~</span>
+<span class="o">*~</span>
+</pre></div>
+
+
+<p>push  </p>
 <div class="highlight"><pre><span></span>$ ghp-import output
 $ git push https://github.com/yourname/yourname.github.io.git gh-pages:master
 </pre></div>
