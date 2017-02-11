@@ -2,12 +2,12 @@
 <html lang="ja">
 
 <head>
-        <meta charset="utf-8">
+            <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-        <title>メモとかいろいろ - Articles in the Memo category</title>
+        <title>AtomでLaTeXを書いて卒論を提出しよう(Mac OS X)</title>
 
         <!-- Bootstrap Core CSS -->
         <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
@@ -31,13 +31,32 @@
             <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-                <meta property="og:locale" content="">
+
+
+        <meta name="description" content="AtomでLaTeXを書いてそのままpdfを見られる環境を構築した.">
+
+        <meta name="author" content="one_meets_seven">
+
+        <meta name="tags" content="latex">
+
+	                <meta property="og:locale" content="">
 		<meta property="og:site_name" content="メモとかいろいろ">
-            <meta name="twitter:card" content="summary_large_image">
-            <meta name="twitter:site" content="@one_meets_seven">
-            <meta name="twitter:title" content="メモとかいろいろ">
-            <meta name="twitter:description" content="Test blog.">
-                <meta name="twitter:image" content="/theme/images/post-bg.jpg">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/one_meets_seven.html">
+	<meta property="og:url" content="/170211-atom-latex.html">
+	<meta property="og:title" content="AtomでLaTeXを書いて卒論を提出しよう(Mac OS X)">
+	<meta property="article:published_time" content="2017-02-11 20:00:00+09:00">
+            <meta property="og:description" content="AtomでLaTeXを書いてそのままpdfを見られる環境を構築した.">
+
+            <meta property="og:image" content="/theme/images/post-bg.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@one_meets_seven">
+        <meta name="twitter:title" content="AtomでLaTeXを書いて卒論を提出しよう(Mac OS X)">
+
+            <meta name="twitter:image" content="/theme/images/post-bg.jpg">
+
+            <meta name="twitter:description" content="AtomでLaTeXを書いてそのままpdfを見られる環境を構築した.">
 </head>
 
 <body>
@@ -71,12 +90,17 @@
     </nav>
 
     <!-- Page Header -->
-        <header class="intro-header" style="background-image: url('/theme/images/home-bg.jpg')">
+        <header class="intro-header" style="background-image: url('/theme/images/post-bg.jpg')">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                     <div class="post-heading">
-                        <h1>Articles in the Memo category</h1>
+                        <h1>AtomでLaTeXを書いて卒論を提出しよう(Mac OS X)</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/one_meets_seven.html">one_meets_seven</a>
+                             on 土 11 2月 2017
+                        </span>
+                        
                     </div>
                 </div>
             </div>
@@ -87,21 +111,60 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <div class="post-preview">
-            <a href="/170210-python-pelican-install.html" rel="bookmark" title="Permalink to PelicanとGitHub-pagesでブログ開設">
-                <h2 class="post-title">
-                    PelicanとGitHub-pagesでブログ開設
-                </h2>
-            </a>
-                <p class="article-summary">
-                    Python3系の環境構築をまとめた. 静的サイトジェネレータPelicanでGitHub-pagesデビューした.
-                </p>
-            <p class="post-meta">Posted by
-                    <a href="/author/one_meets_seven.html">one_meets_seven</a>
-                 on 土 11 2月 2017
-            </p>
-<p>There are <a data-disqus-identifier="170210-python-pelican-install.html" href="/170210-python-pelican-install.html#disqus_thread">comments</a>.</p>        </div>
+    <!-- Post Content -->
+    <article>
+        <h1>AtomでLaTeXを書いて卒論を提出しよう(Mac OS X)</h1>
+<p>Mac OS Xの話です.<br>
+巷で人気のエディタの<a href="https://atom.io">Atom</a> Packageは多種多様で高機能.  </p>
+<p>Atomの中でLaTeXを書き、コンパイルし、pdfビューもAtomでやっちゃいましょう  </p>
+<p><a href="images/atom_tex.png"><img alt="latex in Atom" src="images/atom_tex.png"></a>  </p>
+<h2>BasicTeX</h2>
+<p>MacにTeX全部をインストールしたくはない.<br>
+BasicTeXで事足りる<br>
+FullではなくBasicTex.pkgをインストールする<br>
+<a href="http://www.tug.org/mactex/morepackages.html">BasicTeX</a>  </p>
+<h2>Atomのpackages</h2>
+<p><code>Cmd + ,</code> でSettingsを開きInstallから必要なものをインストール  </p>
+<div class="highlight"><pre><span></span>latex <span class="c1"># atomでlatexを使う</span>
+language-latex <span class="c1"># latexのSyntax Highlightを適用</span>
+latexer <span class="c1"># latexの自動補完(なかなか強力)</span>
+</pre></div>
 
+
+<h3>latex</h3>
+<p><code>latex</code>のSettings  </p>
+<ul>
+<li><code>TeX Path</code>に<code>/Library/TeX/texbin</code>と書く</li>
+<li>ターミナルから$PATHにも通しておく(?)</li>
+<li><code>Engine</code>を<code>platex</code>にする.</li>
+<li><code>Custom Engine</code>に<code>latexmk -pdf</code>と書く</li>
+<li><code>Enable SyncTeX</code>と<code>Enable Extend Build Mode</code>にチェック入れる</li>
+<li><code>Output Format</code>を<code>pdf</code>にする</li>
+<li><code>PDF Producer</code>を<code>dvipdfmx</code>にする</li>
+</ul>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/latex.html">latex</a></p>
+        </div>
+
+    <hr>
+
+        <div class="comments">
+            <h2>Comments !</h2>
+            <div id="disqus_thread"></div>
+            <script type="text/javascript">
+                var disqus_shortname = 'one-meets-seven';
+                var disqus_identifier = '170211-atom-latex.html';
+                var disqus_url = '/170211-atom-latex.html';
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = 'http://one-meets-seven.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            </script>
+            <noscript>Please enable JavaScript to view the comments.</noscript>
+        </div>
             </div>
         </div>
     </div>
