@@ -125,13 +125,13 @@
 <p>このサイト(静的WebジェネレータPelican製)で新しく記事を書くとき,<br>
 Markdownファイルの先頭に何個か<strong>メタ情報を書く必要</strong>がある.  </p>
 <div class="highlight"><pre><span></span>Title: ブログタイトル
-Date: 2017-02-19
+Date: <span class="m">2017</span>-02-19
 Tags: python, CUI
 Slug: works/170219hoeghoge
 Author: one_meets_seven
 Summary: 要約
 
-<span class="gh">#</span> タイトル
+<span class="c1"># タイトル</span>
 </pre></div>
 
 
@@ -154,15 +154,15 @@ askメソッドとか丸写ししたレベル.  </p>
 <p>なにがめんどくさいって<code>Title:</code>とか<code>Date:</code>とかキー名も毎回いちいち書く必要がある.<br>
 不変だからテンプレート化してしまう.  </p>
 <p><code>template_post.md.in</code></p>
-<div class="highlight"><pre><span></span><span class="n">Title</span><span class="p">:</span> <span class="err">$</span><span class="n">title</span>
-<span class="n">Date</span><span class="p">:</span> <span class="err">$</span><span class="n">date</span>
-<span class="n">Tags</span><span class="p">:</span> <span class="err">$</span><span class="n">tags</span>
-<span class="n">Slug</span><span class="p">:</span> <span class="err">$</span><span class="n">slug</span>
-<span class="n">Author</span><span class="p">:</span> <span class="n">one_meets_seven</span>
-<span class="n">Summary</span><span class="p">:</span> <span class="err">$</span><span class="n">summary</span>
-<span class="n">Status</span><span class="p">:</span> <span class="err">$</span><span class="n">status</span>
+<div class="highlight"><pre><span></span>Title: $title
+Date: $date
+Tags: $tags
+Slug: $slug
+Author: one_meets_seven
+Summary: $summary
+Status: $status
 
-<span class="c1"># $title</span>
+# $title
 </pre></div>
 
 
