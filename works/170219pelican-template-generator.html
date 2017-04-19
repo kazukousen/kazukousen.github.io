@@ -125,7 +125,7 @@
 <p>このサイト(静的WebジェネレータPelican製)で新しく記事を書くとき,<br>
 Markdownファイルの先頭に何個か<strong>メタ情報を書く必要</strong>がある.  </p>
 <div class="highlight"><pre><span></span>Title: ブログタイトル
-Date: <span class="m">2017</span>-02-19
+Date: 2017-02-19
 Tags: python, CUI
 Slug: works/170219hoeghoge
 Author: one_meets_seven
@@ -154,15 +154,15 @@ askメソッドとか丸写ししたレベル.  </p>
 <p>なにがめんどくさいって<code>Title:</code>とか<code>Date:</code>とかキー名も毎回いちいち書く必要がある.<br>
 不変だからテンプレート化してしまう.  </p>
 <p><code>template_post.md.in</code></p>
-<div class="highlight"><pre><span></span>Title: $title
-Date: $date
-Tags: $tags
-Slug: $slug
-Author: one_meets_seven
-Summary: $summary
-Status: $status
+<div class="highlight"><pre><span></span><span class="x">Title: </span><span class="p">$</span><span class="nv">title</span><span class="x"></span>
+<span class="x">Date: </span><span class="p">$</span><span class="nv">date</span><span class="x"></span>
+<span class="x">Tags: </span><span class="p">$</span><span class="nv">tags</span><span class="x"></span>
+<span class="x">Slug: </span><span class="p">$</span><span class="nv">slug</span><span class="x"></span>
+<span class="x">Author: one_meets_seven</span>
+<span class="x">Summary: </span><span class="p">$</span><span class="nv">summary</span><span class="x"></span>
+<span class="x">Status: </span><span class="p">$</span><span class="nv">status</span><span class="x"></span>
 
-# $title
+<span class="err">#</span><span class="x"> </span><span class="p">$</span><span class="nv">title</span><span class="x"></span>
 </pre></div>
 
 
@@ -201,8 +201,8 @@ Status: $status
 <p><code>content</code>ディレクトリ内に<code>machine_learning</code>ディレクトリを作成し,<br>
 <code>index.md</code>というファイルを用意する.  </p>
 <p><code>content/machine_learning/index.md</code></p>
-<div class="highlight"><pre><span></span>Title: 機械学習
-Date: 2017-01-01
+<div class="highlight"><pre><span></span><span class="n">Title</span><span class="o">:</span> <span class="err">機械学習</span>
+<span class="n">Date</span><span class="o">:</span> <span class="mi">2017</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>
 </pre></div>
 
 

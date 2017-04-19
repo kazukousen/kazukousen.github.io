@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+            <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+        <title>Target Propagationの解説とTensorflowによる実装</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="/theme/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Custom CSS -->
+        <link href="/theme/css/clean-blog.min.css" rel="stylesheet">
+
+        <!-- Code highlight color scheme -->
+            <link href="/theme/css/code_blocks/monokai.css" rel="stylesheet">
+
+
+        <!-- Custom Fonts -->
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+
+
+        <meta name="description" content="Back Propagationの代替案であるDifference Target Propagationを読んだ.">
+
+        <meta name="author" content="one_meets_seven">
+
+        <meta name="tags" content="target propagation">
+
+	                <meta property="og:locale" content="">
+		<meta property="og:site_name" content="メモとかいろいろ">
+
+	<meta property="og:type" content="article">
+            <meta property="article:author" content="/author/one_meets_seven.html">
+	<meta property="og:url" content="/research/170224-difference-target-propagation.html">
+	<meta property="og:title" content="Target Propagationの解説とTensorflowによる実装">
+	<meta property="article:published_time" content="2017-02-24 20:00:00+09:00">
+            <meta property="og:description" content="Back Propagationの代替案であるDifference Target Propagationを読んだ.">
+
+            <meta property="og:image" content="/theme/images/post-bg.jpg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@one_meets_seven">
+        <meta name="twitter:title" content="Target Propagationの解説とTensorflowによる実装">
+
+            <meta name="twitter:image" content="/theme/images/post-bg.jpg">
+
+            <meta name="twitter:description" content="Back Propagationの代替案であるDifference Target Propagationを読んだ.">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">メモとかいろいろ</a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                                <li><a href="/category/machine_learning.html">機械学習</a></li>
+                                <li><a href="/category/memo.html">Memo</a></li>
+                                <li class="active"><a href="/category/research.html">研究</a></li>
+                                <li><a href="/category/works.html">開発</a></li>
+
+														<li><a href="http://i101330.hatenablog.com">My Hatena blog<i class="fa fa-external-link" aria-hidden="true"></i></a></li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Header -->
+        <header class="intro-header" style="background-image: url('/theme/images/post-bg.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <div class="post-heading">
+                        <h1>Target Propagationの解説とTensorflowによる実装</h1>
+                        <span class="meta">Posted by
+                                <a href="/author/one_meets_seven.html">one_meets_seven</a>
+                             on 金 24 2月 2017
+                        </span>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <!-- Post Content -->
+    <article>
+        <h1>Difference Target Propagationの解説と考察</h1>
+<p>Difference Target Propagation(<a href="https://arxiv.org/abs/1412.7525">arXiv</a>) 読んだ.<br>
+Bengio研究室のLeeさんによる論文.<br>
+2014年にarXivで初投稿されてる(若干行き詰まり感ある)  </p>
+<p>こちらの日本語解説pdfがとても参考になりました.<br>
+<a href="http://deeplearning.jp/wp-content/uploads/2014/04/20150826_suzuki.pdf">20150826_suzuki.pdf</a><br>
+僕の解説よりわかりやすいと思います.  </p>
+<h2>tl;dr</h2>
+<p>誤差逆伝播法(Back Propagation)は生物学的妥当性が弱い.<br>
+そこである程度妥当性を補うTarget Propagtionという方法を提案.という論文.  </p>
+<h2>Back Propagation</h2>
+<p>ニューラルネットワークi層のパラメータ<span class="math">\(\theta_i = \{{\textbf W}_i, {\textbf b}_i\}\)</span>(重みWとバイアスb)を更新するためには  </p>
+<div class="math">$$
+\theta_i = \theta_i - \frac{\partial {\mathcal L}}{\partial \theta_i}
+$$</div>
+<p>これが勾配降下法の基本形である.<br>
+誤差関数<span class="math">\({\partial L}\)</span>を出力層<span class="math">\({\textbf H}_M\)</span>から順に連鎖律を用いて勾配を求めていく.  </p>
+<div class="math">$$
+\begin{align}
+    \theta_M &amp;= \theta_M - \frac{\partial {\mathcal L}}{\partial \theta_M} \\
+    \theta_{M-1} &amp;= \theta_{M-1} - \frac{\partial {\mathcal L}}{\partial {\textbf H}_M}\frac{\partial {\textbf H}_M}{\partial \theta_{M-1}} \\
+                                &amp;= \theta_{M-1} - \delta_{M}\frac{\partial {\textbf H}_M}{\partial \theta_{M-1}} \\
+  ...
+    \theta_{2} &amp;= \theta_{2} - \frac{\partial {\mathcal L}}{\partial \theta_2} \\
+    \theta_{1} &amp;= \theta_{1} - \frac{\partial {\mathcal L}}{\partial \theta_1}
+\end{align}
+$$</div>
+<h3>勾配消失問題</h3>
+<p>もはやReLUにDropOutやBatchNormalizationのおかげで大丈夫だけど<br>
+Back Propagationは勾配が消失してしまう現象があり学習がうまく行かない  </p>
+<p>それは活性化関数にシグモイドなどを使うから起こってしまう.<br>
+シグモイド関数は有界[0, 1]のなめらかな活性化関数.  </p>
+<p><img alt="sigmoid" src="../images/sigmoid.png">  </p>
+<p>青線がシグモイド関数のプロットであり緑線がシグモイドを微分したプロット.<br>
+値は小数点以下であるし、飽和領域(端のほう)はほぼ0に近い.  </p>
+<p>そのためヤコビアンを線形に乗算していくBack Propagationでは<br>
+出力層から離れた層の更新能力が著しく低下する  </p>
+<h2>Target Propagation</h2>
+<p>Back Propagationのような線形にヤコビアンを乗算していくやり方は<br>
+生物学的観点からみると妥当性がない.  </p>
+<p>(でもまぁ脳の場所によるやろ...って気もするけど...)  </p>
+<p>各層に<strong>ターゲット</strong>という概念を取り入れて,<br>
+ヤコビアンの代わりに<strong>Approximate Inverse</strong>(近似逆)を用いた学習を行う.  </p>
+<h3>定式化</h3>
+<p>ニューラルネットを定式化する.<br>
+入力を<span class="math">\({\textbf x}\)</span>,出力を<span class="math">\({\textbf y}\)</span>,
+層数を<span class="math">\(i=0,...,M\)</span>とし各層を<span class="math">\({\textbf h}_i\)</span>と置く.<br>
+<span class="math">\({\textbf h}_0={\textbf x}\)</span>,
+<span class="math">\({\textbf h}_M={\textbf y}\)</span>である.<br>
+各層の活性化関数<span class="math">\(s_i\)</span>と
+パラメータ<span class="math">\(\theta_i = \{{\textbf W}_i, {\textbf b}_i\}\)</span>より
+入力層除く各層は以下のように定式化できる.  </p>
+<div class="math">$$
+\begin{align}
+  {\textbf h}_i &amp;= s_i({\textbf W}_i{\textbf h}_{i-1} + {\textbf b}_i)\\
+  &amp;= f_i({\textbf h}_{i-1})
+\end{align}
+$$</div>
+<p>この時<span class="math">\(i\)</span>から<span class="math">\(j\)</span>までのパラメータを<span class="math">\(\theta^{i,j}_{\textbf W} = \{{\textbf W}_k, k=i+1,...,j\}\)</span>とすると,<br>
+<span class="math">\({\textbf h}_j\)</span>は<span class="math">\({\textbf h}_i\)</span>についての関数で表すことができる.  </p>
+<div class="math">$$
+\begin{align}
+  {\textbf h}_j = {\textbf h}_j({\textbf h}_i; \theta^{i,j}_{\textbf W})
+\end{align}
+$$</div>
+<p>訓練事例が<span class="math">\(({\textbf x},{\textbf y})\)</span>の時,誤差関数
+<span class="math">\(L({\textbf h}_M({\textbf x};\theta^{0, M}_{\textbf W}), {\textbf y})\)</span>
+は全体誤差となる.<br>
+i層に着目すると,全体誤差は次のように記述できる.  </p>
+<div class="math">$$
+\begin{align}
+  L({\textbf h}_M({\textbf x}; \theta^{0, M}_{\textbf W}), {\textbf y})
+   = L({\textbf h}_M({\textbf h}_i({\textbf x};
+   \theta^{0, i}_{\textbf W}); \theta^{i, M}_{\textbf W}),
+   {\textbf y})
+\end{align}
+$$</div>
+<h3>ターゲット</h3>
+<p>Target Propagationでは,全体誤差が小さくなるような<br>
+各層<span class="math">\({\textbf h}_i({\textbf x}; \theta^{0, i}_{\textbf W})\)</span>の
+ターゲット<span class="math">\({\hat {\textbf h}}_i\)</span>を導入する.  </p>
+<div class="math">$$
+\begin{align}
+  L({\textbf h}_M({\hat {\textbf h}}_i; \theta^{i, M}_{\textbf W}), {\textbf y})
+   &lt; L({\textbf h}_M({\textbf h}_i({\textbf x};
+    \theta^{0, i}_{\textbf W}); \theta^{i, M}_{\textbf W}),
+   {\textbf y})
+\end{align}
+$$</div>
+<blockquote></blockquote>
+<p>ターゲットとの二乗誤差を設定する.  </p>
+<div class="math">$$
+\begin{align}
+    L({\textbf h}_i, {\hat {\textbf h}}_i) = ||{\textbf h}_i - {\hat {\textbf h}}_i||^2_2
+\end{align}
+$$</div>
+<p>この二乗誤差で各層のパラメータを更新する.  </p>
+<div class="math">$$
+\begin{align}
+  \theta_i \leftarrow \theta_i - \alpha_i\frac{\partial L({\textbf h}_i, {\hat {\textbf h}}_i)}{\partial {\textbf h}_i}\frac{\partial {\textbf h}_i}{\partial \theta_i}
+\end{align}
+$$</div>
+<p>ここで<span class="math">\(\alpha_i\)</span>は学習率であり,<span class="math">\({\hat {\textbf h}}_i\)</span>は定数とする.<br>
+そのため勾配の計算は一つの層の分のみになり,勾配消失問題を回避できる.  </p>
+<h3>approximate inverse</h3>
+<p>出力層<span class="math">\({\textbf h}_M\)</span>のターゲットは,教師あり学習ならばラベルの<span class="math">\({\textbf y}\)</span>であるし,<br>
+オートエンコーダなどの教師なし学習ならば入力自身の<span class="math">\({\textbf x}\)</span>となる.  </p>
+<p>では中間層のターゲットをどう決定するか.  </p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script>
+    </article>
+
+        <div class="tags">
+            <p>tags: <a href="/tag/target-propagation.html">target propagation</a></p>
+        </div>
+
+    <hr>
+
+        <div class="comments">
+            <h2>Comments !</h2>
+						<div id="disqus_thread"></div>
+						<script>
+
+							/**
+							*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+							*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+							/*
+							var disqus_config = function () {
+								this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+								this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+						};
+						*/
+						(function() { // DON'T EDIT BELOW THIS LINE
+							var d = document, s = d.createElement('script');
+							s.src = '//one-meets-seven.disqus.com/embed.js';
+							s.setAttribute('data-timestamp', +new Date());
+							(d.head || d.body).appendChild(s);
+					})();
+				</script>
+				<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                            <li>
+                                <a href="https://twitter.com/one_meets_seven">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/kazukousen">
+                                    <span class="fa-stack fa-lg">
+                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                    </span>
+                                </a>
+                            </li>
+                    </ul>
+<p class="copyright text-muted">
+    Blog powered by <a href="http://getpelican.com">Pelican</a>,
+    which takes great advantage of <a href="http://python.org">Python</a>.
+</p>                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="/theme/js/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/theme/js/bootstrap.min.js"></script>
+
+        <!-- Custom Theme JavaScript -->
+        <script src="/theme/js/clean-blog.min.js"></script>
+
+<script type="text/javascript">
+    var disqus_shortname = 'one-meets-seven';
+    (function () {
+        var s = document.createElement('script'); s.async = true;
+        s.type = 'text/javascript';
+        s.src = 'http://' + disqus_shortname + '.disqus.com/count.js';
+        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+    }());
+</script>
+</body>
+
+</html>
